@@ -1,5 +1,6 @@
 'use client'
 
+import { use } from 'react' // Import the use hook from React
 import { notFound } from 'next/navigation'
 import { LayoutWrapper } from '@/components/layout-wrapper'
 import { Button } from '@/components/ui/button'
@@ -139,11 +140,12 @@ export default function MyForm() {
 }
 
 interface ComponentPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }> // Changed to Promise
 }
 
 export default function ComponentPage({ params }: ComponentPageProps) {
-  const component = sampleComponents[params.id as keyof typeof sampleComponents]
+  const { id } = use(params) // Use React's use hook to unwrap the Promise
+  const component = sampleComponents[id as keyof typeof sampleComponents]
   const { addItem } = useCartStore()
 
   if (!component) {
@@ -155,8 +157,8 @@ export default function ComponentPage({ params }: ComponentPageProps) {
       id: component.id,
       name: component.name,
       price: component.price,
-      tier: component.tier,
-      type: component.type,
+      tier: component.tier as 'FREE' | 'PREMIUM',
+      type: component.type as 'COMPONENT' | 'TEMPLATE' | 'BLOCK' | 'MVP',
       imageUrl: component.imageUrl
     })
   }
