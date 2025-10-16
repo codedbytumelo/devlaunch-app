@@ -18,7 +18,9 @@ import {
   Lock,
   Mail,
   User,
-  Phone
+  Folder,
+  HardDrive,
+  FileArchive
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -55,6 +57,9 @@ export default function CheckoutPage() {
   const [orderComplete, setOrderComplete] = useState(false)
   const [orderId, setOrderId] = useState('')
   const [isClient, setIsClient] = useState(false) // Track if we're on the client
+  const [downloadLocation, setDownloadLocation] = useState('') // New state for download location
+  const [showLocationInput, setShowLocationInput] = useState(false) // Control when to show location input
+  const [isDownloading, setIsDownloading] = useState(false) // Track download state
   
   // Ref for card number input to handle cursor position
   const cardNumberRef = useRef<HTMLInputElement>(null)
@@ -146,13 +151,50 @@ export default function CheckoutPage() {
 
     setIsProcessing(false)
     setOrderComplete(true)
-    
-    // Removed the automatic cart clearing after 3 seconds
-    // The cart will now be cleared only when the user clicks "Continue Shopping"
   }
 
-  const handleContinueToDownloads = () => {
-    router.push(`/download/${orderId}`)
+  // Function to simulate downloading files and trigger browser's save dialog
+  const handleDownloadNow = async () => {
+    setIsDownloading(true)
+    
+    try {
+      // In a real application, this would be the actual URL to your ZIP file
+      // For this example, we'll simulate a download with a dummy file
+      
+      // Create a dummy blob to simulate a file
+      const dummyContent = `This is a dummy ZIP file for order ${orderId}. 
+In a real application, this would contain all the purchased items.
+Items: ${items.map(item => item.name).join(', ')}
+Download location: ${downloadLocation || 'Default'}`;
+      
+      const blob = new Blob([dummyContent], { type: 'application/zip' });
+      
+      // Create a download link and trigger the browser's save dialog
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      // Set the filename - using the download location if provided
+      const filename = downloadLocation 
+        ? `${downloadLocation.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.zip` 
+        : `purchase_${orderId}.zip`;
+      
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setIsDownloading(false);
+      }, 100);
+      
+      console.log(`Download triggered for: ${filename}`);
+    } catch (error) {
+      console.error('Download failed:', error);
+      setIsDownloading(false);
+    }
   }
 
   // New function to handle "Continue Shopping" button click
@@ -216,17 +258,75 @@ export default function CheckoutPage() {
             <CardContent className="space-y-4">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-4">
-                  You will receive download links for your items shortly.
+                  You can now download your purchased items.
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Order ID: {orderId}
                 </p>
               </div>
+              
+              {/* Download Location Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Download Folder Name</Label>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowLocationInput(!showLocationInput)}
+                    className="h-8 px-2 text-xs"
+                  >
+                    {showLocationInput ? 'Cancel' : 'Customize'}
+                  </Button>
+                </div>
+                
+                {showLocationInput ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Folder className="h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="e.g., My Website Project"
+                        value={downloadLocation}
+                        onChange={(e) => setDownloadLocation(e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      This will be used as the filename for your download.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2 p-2 bg-muted rounded-md">
+                    <HardDrive className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      {downloadLocation || `purchase_${orderId}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
               <div className="space-y-2">
-                <Button className="w-full" onClick={handleContinueToDownloads}>
-                  <Download className="mr-2 h-4 w-4" />
-                  View Downloads
+                <Button 
+                  className="w-full" 
+                  onClick={handleDownloadNow}
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Preparing Download...
+                    </>
+                  ) : (
+                    <>
+                      <FileArchive className="mr-2 h-4 w-4" />
+                      Download Now
+                    </>
+                  )}
                 </Button>
+                
+                <div className="text-xs text-center text-muted-foreground">
+                  Clicking above will open your browser's save dialog
+                </div>
+                
                 <Button variant="outline" className="w-full" onClick={handleContinueShopping}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Continue Shopping
