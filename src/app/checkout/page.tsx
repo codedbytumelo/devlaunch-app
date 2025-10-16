@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { LayoutWrapper } from '@/components/layout-wrapper'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,7 +18,6 @@ import {
   Lock,
   Mail,
   User,
-  MapPin,
   Phone
 } from 'lucide-react'
 import Link from 'next/link'
@@ -54,12 +53,71 @@ export default function CheckoutPage() {
 
   const [isProcessing, setIsProcessing] = useState(false)
   const [orderComplete, setOrderComplete] = useState(false)
+  const [orderId, setOrderId] = useState('')
+  const [isClient, setIsClient] = useState(false) // Track if we're on the client
+  
+  // Ref for card number input to handle cursor position
+  const cardNumberRef = useRef<HTMLInputElement>(null)
+
+  // Set isClient to true when component mounts on client
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Format card number with spaces every 4 digits and handle cursor position
+  const formatCardNumber = (value: string, previousValue: string) => {
+    // Remove all non-digit characters
+    const cleanedValue = value.replace(/\D/g, '');
+    // Add space after every 4 digits
+    const formattedValue = cleanedValue.replace(/(.{4})/g, '$1 ').trim();
+    
+    // Handle cursor position
+    if (cardNumberRef.current) {
+      const cursorPosition = cardNumberRef.current.selectionStart || 0;
+      const isDeleting = value.length < previousValue.length;
+      
+      if (!isDeleting && cleanedValue.length > 4 && cleanedValue.length % 4 === 1) {
+        // If we just added a digit that causes a space to be added, move cursor forward
+        setTimeout(() => {
+          if (cardNumberRef.current) {
+            cardNumberRef.current.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+          }
+        }, 0);
+      }
+    }
+    
+    return formattedValue;
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    const { name, value } = e.target;
+    
+    setFormData(prev => {
+      if (name === 'cardNumber') {
+        return {
+          ...prev,
+          [name]: formatCardNumber(value, prev.cardNumber)
+        };
+      } else if (name === 'expiryDate') {
+        // Format expiry date as MM/YY
+        const cleanedValue = value.replace(/\D/g, '');
+        if (cleanedValue.length >= 2) {
+          return {
+            ...prev,
+            [name]: cleanedValue.substring(0, 2) + '/' + cleanedValue.substring(2, 4)
+          };
+        }
+        return {
+          ...prev,
+          [name]: cleanedValue
+        };
+      } else {
+        return {
+          ...prev,
+          [name]: value
+        };
+      }
+    });
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,21 +127,54 @@ export default function CheckoutPage() {
     // Simulate order processing
     await new Promise(resolve => setTimeout(resolve, 2000))
 
+    // Generate a unique order ID only on the client
+    const newOrderId = isClient ? `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` : ''
+    setOrderId(newOrderId)
+
     // In a real app, this would create the order in the database
     // and process payment if needed
     console.log('Order submitted:', {
       items,
       customer: formData,
-      total: getTotalPrice()
+      total: getTotalPrice(),
+      orderId: newOrderId
     })
+
+    // Simulate sending email with invoice and download link
+    console.log(`Sending invoice and download link to: ${formData.email}`)
+    console.log(`Download link: /download/${newOrderId}`)
 
     setIsProcessing(false)
     setOrderComplete(true)
     
-    // Clear cart after successful order
-    setTimeout(() => {
-      clearCart()
-    }, 3000)
+    // Removed the automatic cart clearing after 3 seconds
+    // The cart will now be cleared only when the user clicks "Continue Shopping"
+  }
+
+  const handleContinueToDownloads = () => {
+    router.push(`/download/${orderId}`)
+  }
+
+  // New function to handle "Continue Shopping" button click
+  const handleContinueShopping = () => {
+    // Clear the cart first
+    clearCart()
+    // Then navigate to the checkout page which will show the empty cart
+    router.push('/checkout')
+  }
+
+  // Show loading state during SSR
+  if (!isClient) {
+    return (
+      <LayoutWrapper>
+        <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading checkout...</p>
+          </div>
+        </div>
+      </LayoutWrapper>
+    )
   }
 
   if (items.length === 0) {
@@ -124,20 +215,21 @@ export default function CheckoutPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-4">
                   You will receive download links for your items shortly.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Order ID: {orderId}
                 </p>
               </div>
               <div className="space-y-2">
-                <Button className="w-full" asChild>
-                  <Link href="/">
-                    Continue Shopping
-                  </Link>
+                <Button className="w-full" onClick={handleContinueToDownloads}>
+                  <Download className="mr-2 h-4 w-4" />
+                  View Downloads
                 </Button>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link href="/documentation">
-                    View Documentation
-                  </Link>
+                <Button variant="outline" className="w-full" onClick={handleContinueShopping}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Continue Shopping
                 </Button>
               </div>
             </CardContent>
@@ -266,6 +358,7 @@ export default function CheckoutPage() {
                     <div>
                       <Label htmlFor="cardNumber">Card Number</Label>
                       <Input
+                        ref={cardNumberRef}
                         id="cardNumber"
                         name="cardNumber"
                         type="text"
@@ -273,6 +366,7 @@ export default function CheckoutPage() {
                         required
                         value={formData.cardNumber}
                         onChange={handleInputChange}
+                        maxLength={19} // 16 digits + 3 spaces
                       />
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -286,6 +380,7 @@ export default function CheckoutPage() {
                           required
                           value={formData.expiryDate}
                           onChange={handleInputChange}
+                          maxLength={5}
                         />
                       </div>
                       <div>
@@ -298,6 +393,7 @@ export default function CheckoutPage() {
                           required
                           value={formData.cvv}
                           onChange={handleInputChange}
+                          maxLength={4}
                         />
                       </div>
                       <div>
