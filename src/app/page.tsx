@@ -1,7 +1,11 @@
+"use client";
+
+
 import { LayoutWrapper } from '@/components/layout-wrapper'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { 
   Rocket, 
   Code, 
@@ -13,11 +17,27 @@ import {
   ArrowRight,
   CheckCircle,
   Users,
-  TrendingUp
+  TrendingUp,
+  Mail,
+  Clock,
+  Gift,
+  Bell
 } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function Home() {
+  const [email, setEmail] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    // In a real implementation, you would send this to your backend
+    console.log('Email submitted:', email)
+    setIsSubmitted(true)
+    setEmail('')
+  }
+
   const features = [
     {
       icon: Code,
@@ -41,11 +61,22 @@ export default function Home() {
     }
   ]
 
-  const stats = [
-    { label: 'Components', value: '150+', icon: Code },
-    { label: 'Templates', value: '50+', icon: Palette },
-    { label: 'Active Users', value: '10K+', icon: Users },
-    { label: 'Projects Built', value: '25K+', icon: TrendingUp }
+  const benefits = [
+    {
+      icon: Gift,
+      title: 'Exclusive Early Access',
+      description: 'Be the first to access our premium components and templates'
+    },
+    {
+      icon: Clock,
+      title: 'Limited Spots Available',
+      description: 'We\'re opening access in batches to ensure quality support'
+    },
+    {
+      icon: Bell,
+      title: 'Priority Notifications',
+      description: 'Get notified as soon as your spot in the waiting list opens up'
+    }
   ]
 
   return (
@@ -55,47 +86,76 @@ export default function Home() {
         <div className="container mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-6">
-              <Badge variant="secondary">v1.0</Badge>
-              <Badge variant="outline">New</Badge>
+              <Badge variant="secondary">Coming Soon</Badge>
+              <Badge variant="outline">Limited Access</Badge>
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-              Build Products
-              <span className="text-primary"> Faster</span>
+              Get Early Access to
+              <span className="text-primary"> Build Products Faster</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              High-quality templates, components, blocks, and MVPs built for modern developers. 
-              Ship your next project in record time with our production-ready solutions.
+              Join our exclusive waiting list for first access to our high-quality templates, components, blocks, and MVPs. 
+              Limited spots available.
             </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Button size="lg" asChild>
-                <Link href="/components">
-                  Explore Components
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
-                  <Github className="mr-2 h-4 w-4" />
-                  View on GitHub
-                </Link>
-              </Button>
+            
+            {/* Waiting List Form */}
+            <div className="mt-10 max-w-md mx-auto">
+              {isSubmitted ? (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800">
+                  <div className="flex items-center justify-center">
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    <span>Thank you! You've been added to our waiting list.</span>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="flex-grow"
+                  />
+                  <Button type="submit" size="lg" className="whitespace-nowrap">
+                    Join Waiting List
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </form>
+              )}
+              <p className="mt-3 text-sm text-muted-foreground">
+                Join 2,500+ developers already on the waiting list. No spam, unsubscribe anytime.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Benefits Section */}
       <section className="bg-muted/50 py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <stat.icon className="h-8 w-8 text-primary" />
-                </div>
-                <div className="text-3xl font-bold text-foreground">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+              Why Join Our Waiting List?
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Get exclusive benefits and be the first to access our premium development resources.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {benefits.map((benefit, index) => (
+              <Card key={index} className="text-center">
+                <CardHeader>
+                  <div className="flex items-center justify-center mb-4">
+                    <benefit.icon className="h-12 w-12 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">{benefit.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{benefit.description}</CardDescription>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
@@ -106,11 +166,10 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-              Everything You Need to Ship Fast
+              What You'll Get Access To
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              From individual components to complete MVPs, we've got you covered with 
-              production-ready solutions that scale.
+              Our waiting list members will be the first to access these premium resources.
             </p>
           </div>
           
@@ -132,109 +191,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="bg-muted/50 py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-              Explore Our Collections
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Browse through our curated collections of components, templates, blocks, and MVPs.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                title: 'Components',
-                description: '150+ reusable UI components',
-                href: '/components',
-                items: ['Buttons', 'Forms', 'Navigation', 'Cards']
-              },
-              {
-                title: 'Templates',
-                description: '50+ complete page templates',
-                href: '/templates',
-                items: ['Landing Pages', 'Dashboards', 'Authentication', 'Blog']
-              },
-              {
-                title: 'Blocks',
-                description: '100+ pre-built UI sections',
-                href: '/blocks',
-                items: ['Headers', 'Features', 'Testimonials', 'Footers']
-              },
-              {
-                title: 'MVPs',
-                description: 'Complete starter applications',
-                href: '/mvp',
-                items: ['PYNE', 'Zukani', 'Nexora', 'More...']
-              },
-              {
-                title: 'Tools',
-                description: 'Developer productivity tools',
-                href: '/tools',
-                items: ['DevAI', 'Code Generators', 'Utilities', 'CLI Tools']
-              },
-              {
-                title: 'Documentation',
-                description: 'Comprehensive guides and API',
-                href: '/documentation',
-                items: ['Getting Started', 'API Reference', 'Examples', 'Best Practices']
-              }
-            ].map((category, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {category.title}
-                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                  </CardTitle>
-                  <CardDescription>{category.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {category.items.map((item, itemIndex) => (
-                      <div key={itemIndex} className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Button className="w-full mt-4" variant="outline" asChild>
-                    <Link href={category.href}>
-                      Explore {category.title}
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24">
+      {/* Final CTA Section */}
+      <section className="py-24 bg-gradient-to-r from-primary/10 to-primary/5">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-              Ready to Build Something Amazing?
+              Don't Miss Your Spot!
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Join thousands of developers who are shipping products faster with Devlaunch.
+              We're opening access in limited batches. Join the waiting list now to secure your early access spot.
             </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-y-4 gap-x-6">
               <Button size="lg" asChild>
-                <Link href="/components">
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Browse Components
+                <Link href="#waitlist-form">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Join the Waiting List
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/documentation">
-                  Read Documentation
+                <Link href="https://github.com/devlaunchhq-hub" target="_blank" rel="noopener noreferrer">
+                  <Github className="mr-2 h-4 w-4" />
+                  Follow Updates
                 </Link>
               </Button>
             </div>
+            <p className="mt-6 text-sm text-muted-foreground">
+              Questions? <Link href="#" className="text-primary hover:underline">Contact us</Link>
+            </p>
           </div>
         </div>
       </section>

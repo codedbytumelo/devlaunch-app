@@ -1,48 +1,23 @@
 import React from 'react'
 import Link from 'next/link'
-import { Github, Twitter, Mail, ExternalLink } from 'lucide-react'
+import { Github, X, Mail, ArrowRight } from 'lucide-react'
 import { ThemeAwareImage } from '@/components/theme-aware-image'
+import { Button } from '@/components/ui/button'
 
 export function Footer() {
-  const footerLinks = {
-    product: [
-      { name: 'Components', href: '/components' },
-      { name: 'Templates', href: '/templates' },
-      { name: 'Blocks', href: '/blocks' },
-      { name: 'MVPs', href: '/mvp' },
-    ],
-    resources: [
-      { name: 'Documentation', href: '/documentation' },
-      { name: 'Devlog', href: '/devlog' },
-      { name: 'Changelog', href: '/changelog' },
-      { name: 'API Reference', href: '/documentation/api' },
-    ],
-    company: [
-      { name: 'About', href: '/about' },
-      { name: 'Blog', href: '/blog' },
-      { name: 'Careers', href: '/careers' },
-      { name: 'Contact', href: '/contact' },
-    ],
-    legal: [
-      { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'License', href: '/license' },
-      { name: 'Cookie Policy', href: '/cookies' },
-    ],
-  }
-
   const socialLinks = [
-    { name: 'GitHub', href: 'https://github.com', icon: Github },
-    { name: 'Twitter', href: 'https://twitter.com', icon: Twitter },
+    { name: 'GitHub', href: 'https://github.com/devlaunchhq-hub', icon: Github },
+    { name: 'X', href: 'https://twitter.com', icon: X },
     { name: 'Email', href: 'mailto:hello@devlaunch.com', icon: Mail },
   ]
 
   return (
     <footer className="border-t bg-background">
       <div className="container px-4 py-12 md:px-6">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
-          <div className="lg:col-span-2">
-            <div className="flex items-center space-x-2">
+        <div className="flex flex-col items-center">
+          {/* Logo and Description */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="flex items-center space-x-2 mb-4">
               <ThemeAwareImage
                 lightSrc="/devlaunch-logo-light.png"
                 darkSrc="/devlaunch-logo-dark.png"
@@ -56,102 +31,51 @@ export function Footer() {
                 v1
               </span>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground max-w-md">
-              Build and ship products faster with our high-quality templates, components, blocks, and MVPs. 
-              Designed for modern developers using shadcn/ui, Tailwind, and React.
+            <p className="text-center text-muted-foreground max-w-md">
+              Get early access to our premium components, templates, and MVP solutions. 
+              Join thousands of developers on our waiting list.
             </p>
-            <div className="mt-6 flex space-x-4">
-              {socialLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <link.icon className="h-5 w-5" />
-                  <span className="sr-only">{link.name}</span>
-                </Link>
-              ))}
-            </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-2 lg:col-span-3">
-            <div>
-              <h4 className="text-sm font-semibold">Product</h4>
-              <ul className="mt-4 space-y-2">
-                {footerLinks.product.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-semibold">Resources</h4>
-              <ul className="mt-4 space-y-2">
-                {footerLinks.resources.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-semibold">Company</h4>
-              <ul className="mt-4 space-y-2">
-                {footerLinks.company.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-semibold">Legal</h4>
-              <ul className="mt-4 space-y-2">
-                {footerLinks.legal.map((link) => (
-                  <li key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-8 border-t pt-8">
-          <div className="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
-            <p className="text-xs text-muted-foreground">
-              © 2025 Devlaunch. All rights reserved.
+          {/* Waiting List CTA */}
+          <div className="mb-10 w-full max-w-md">
+            <Button size="lg" className="w-full" asChild>
+              <Link href="#waitlist">
+                Join the Waiting List
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <p className="mt-3 text-center text-sm text-muted-foreground">
+              Limited spots available. Be the first to know when we launch.
             </p>
-            <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-              <span>Built with</span>
-              <ExternalLink className="h-3 w-3" />
-              <span>Next.js, shadcn/ui, and Tailwind CSS</span>
+          </div>
+          
+          {/* Social Links */}
+          <div className="flex space-x-6 mb-10">
+            {socialLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <link.icon className="h-5 w-5" />
+                <span className="sr-only">{link.name}</span>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Bottom Section */}
+          <div className="w-full border-t pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-xs text-muted-foreground mb-4 md:mb-0">
+                © 2025 Devlaunch. All rights reserved.
+              </p>
+              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                <span>Built with</span>
+                <span className="font-medium">Next.js, shadcn/ui, and Tailwind CSS</span>
+              </div>
             </div>
           </div>
         </div>
